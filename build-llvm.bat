@@ -274,7 +274,20 @@ if defined BUILD (
 :doconfigure
 if not defined DEBUG (set BUILD_TYPE=Release) else (set BUILD_TYPE=Debug)
 if not defined STATIC (set CRT_TYPE_RELEASE=MD& set CRT_TYPE_DEBUG=MDd) else (set CRT_TYPE_RELEASE=MT& set CRT_TYPE_DEBUG=MTd)
-cmake -H. -GNinja -Bbuild -DBUILD_SHARED_LIBS=false LLVM_BUILD_STATIC=true -DLLVM_ENABLE_RTTI=0 -DLLVM_USE_CRT_RELEASE=%CRT_TYPE_RELEASE% -DLLVM_USE_CRT_DEBUG=%CRT_TYPE_DEBUG% -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.exe -DCMAKE_BUILD_TYPE=%BUILD_TYPE% %CWD%
+if "x%TARGET_ARCH_BITS%" == "x64" (set LLVM_BIN_PATH=C:/PROGRA~1/LLVM/bin) else (set LLVM_BIN_PATH=C:/PROGRA~2/LLVM/bin)
+
+cmake -H. -GNinja -Bbuild^
+        -DBUILD_SHARED_LIBS=false^
+        -DLLVM_BUILD_STATIC=true^
+        -DLLVM_ENABLE_RTTI=0^
+        -DLLVM_USE_CRT_RELEASE=%CRT_TYPE_RELEASE%^
+        -DLLVM_USE_CRT_DEBUG=%CRT_TYPE_DEBUG%^
+        -DCMAKE_C_COMPILER="%LLVM_BIN_PATH%/clang-cl.exe"^
+        -DCMAKE_CXX_COMPILER="%LLVM_BIN_PATH%/clang-cl.exe"^
+        -DCMAKE_LINKER="%LLVM_BIN_PATH%/lld-link.exe"^
+        -DCMAKE_BUILD_TYPE=%BUILD_TYPE%^
+        %CWD%
+
 if defined BUILD goto checkbuild
 exit /b 0
 
