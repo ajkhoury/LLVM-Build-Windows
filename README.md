@@ -6,7 +6,7 @@ Credits to MSYS project and [Matthew Oliver](https://github.com/Sibras)
 
 ## Usage
 
-Open a command prompt (cmd.exe) and change directory to the root of the LLVM directory tree.
+Open a command prompt (cmd.exe) and change directory to the root of your LLVM directory tree.
 
     >cd C:\llvm-7.0.0
 
