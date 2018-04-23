@@ -27,7 +27,6 @@ x86
 Use the `-help` argument for the script for more information:
 
     >build-llvm.bat -help
-    
     Detected 64 bit system...
     Usage:
         build-llvm.bat [options]
