@@ -35,6 +35,7 @@ Credits to MSYS project and [Matthew Oliver](https://github.com/Sibras)
             -help | --help | -? | /?     Display this help and exit
 
 4. Run the build script for the target of your choice:
+
     x64
 
         >build-llvm.bat -configure -build -static -target x64 -directory build-release-x64
