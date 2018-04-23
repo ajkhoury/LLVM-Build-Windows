@@ -1,7 +1,11 @@
 @echo off
 setlocal
 
+REM
+REM Convert backslashes to forward slashes for peace of mind.
+REM
 set CWD=%~dp0
+set "CWD=%CWD:\=/%"
 
 REM
 REM Check what architecture we are running on
@@ -152,6 +156,7 @@ if "%SYSARCH%"=="32" (
     echo Error: Running on invalid architecture!
     exit /b 5
 )
+echo TARGET_ARCH=%TARGET_ARCH%
 if "%TARGET_ARCH%" == "64" ( 
     set TARGET_ARCH_BITS=64
 ) else if "%TARGET_ARCH%" == "amd64" (
@@ -173,6 +178,7 @@ if not ERRORLEVEL 1 (
     echo Visual Studio 2017 installation detected...
     for /f "skip=2 tokens=2,*" %%a in ('reg.exe query "HKLM\SOFTWARE%WOWNODE%\Microsoft\VisualStudio\SxS\VS7" /v "15.0"') do (
         if exist "%%bVC\Auxiliary\Build\vcvars%TARGET_ARCH_BITS%.bat" (
+            set VSINSTALLDIR=%%b
             echo Found vcvars file at "%%bVC\Auxiliary\Build\vcvars%TARGET_ARCH_BITS%.bat"
             call "%%bVC\Auxiliary\Build\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
             goto breakoutmsvc15
@@ -190,6 +196,7 @@ if not ERRORLEVEL 1 (
     echo Visual Studio 2015 installation detected...
     for /f "skip=2 tokens=2,*" %%a in ('reg.exe query "HKLM\Software%WOWNODE%\Microsoft\VisualStudio\14.0" /v "InstallDir"') do (
         if exist "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" (
+            set VSINSTALLDIR=%%b..\..\
             echo Found vcvars file at "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat"
             call "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
             goto breakoutmsvc14
@@ -207,6 +214,7 @@ if not ERRORLEVEL 1 (
     echo Visual Studio 2013 installation detected...
     for /f "skip=2 tokens=2,*" %%a in ('reg.exe query "HKLM\Software%WOWNODE%\Microsoft\VisualStudio\12.0" /v "InstallDir"') do (
         if exist "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" (
+            set VSINSTALLDIR=%%b..\..\
             echo Found vcvars file at "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat"
             call "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
             goto breakoutmsvc12
@@ -224,6 +232,7 @@ if not ERRORLEVEL 1 (
     echo Visual Studio 2008 installation detected...
     for /f "skip=2 tokens=2,*" %%a in ('reg.exe query "HKLM\Software%WOWNODE%\Microsoft\VisualStudio\12.0" /v "InstallDir"') do (
         if exist "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" (
+            set VSINSTALLDIR=%%b..\..\
             echo Found vcvars file at "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat"
             call "%%b..\..\VC\bin%MSVCVARSDIR%\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
             goto breakoutmsvc9
@@ -241,6 +250,7 @@ REM If none were found check for an environment variable to help locate the VS i
 REM
 if defined VS140COMNTOOLS (
     if exist "%VS140COMNTOOLS%\..\..\VC\vcvars%TARGET_ARCH_BITS%.bat" (
+        set VSINSTALLDIR=%VS140COMNTOOLS%\..\..\
         echo Visual Studio 2015 environment detected through environment variable...
         call "%VS140COMNTOOLS%\..\..\VC\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
         set MSVC_VER=14
@@ -249,6 +259,7 @@ if defined VS140COMNTOOLS (
 )
 if defined VS120COMNTOOLS (
     if exist "%VS120COMNTOOLS%\..\..\VC\vcvars%TARGET_ARCH_BITS%.bat" (
+        set VSINSTALLDIR=%VS120COMNTOOLS%\..\..\
         echo Visual Studio 2013 environment detected through environment variable...
         call "%VS120COMNTOOLS%\..\..\VC\vcvars%TARGET_ARCH_BITS%.bat" >nul 2>&1
         set MSVC_VER=12
@@ -259,6 +270,8 @@ echo Error: Could not find valid Visual Studio installation!
 exit /b 6
 
 :msvcdone
+
+echo VSINSTALLDIR=%VSINSTALLDIR%
 
 :checkconfigure
 if defined CONFIGURE (
@@ -274,17 +287,30 @@ if defined BUILD (
 :doconfigure
 if not defined DEBUG (set BUILD_TYPE=Release) else (set BUILD_TYPE=Debug)
 if not defined STATIC (set CRT_TYPE_RELEASE=MD& set CRT_TYPE_DEBUG=MDd) else (set CRT_TYPE_RELEASE=MT& set CRT_TYPE_DEBUG=MTd)
-if "x%TARGET_ARCH_BITS%" == "x64" (set LLVM_BIN_PATH=C:/PROGRA~1/LLVM/bin) else (set LLVM_BIN_PATH=C:/PROGRA~2/LLVM/bin)
+if "x%TARGET_ARCH_BITS%" == "x64" (set ARCH=x64) else (set ARCH=x86)
+if "x%ARCH%" == "xx64" (set LLVM_BIN_PATH=C:/PROGRA~1/LLVM/bin) else (set LLVM_BIN_PATH=C:/PROGRA~2/LLVM/bin)
+if "x%ARCH%" == "xx64" (set GENERATOR_PLATFORM=x64) else (set GENERATOR_PLATFORM=)
 
-cmake -H. -GNinja -Bbuild^
-        -DBUILD_SHARED_LIBS=false^
-        -DLLVM_BUILD_STATIC=true^
+set ZLIB_PATH=%CWD%third-party/zlib
+set ZLIB_LIBRARY_PATH=%ZLIB_PATH%/%ARCH%
+set ZLIB_INCLUDE_PATH=%ZLIB_PATH%
+echo ZLIB_PATH is %ZLIB_PATH%
+
+cmake -H. -G"Visual Studio 15 2017" -Bbuild^
+        -DBUILD_SHARED_LIBS=Off^
+        -DLLVM_INCLUDE_TESTS=Off^
         -DLLVM_ENABLE_RTTI=0^
+        -DLLVM_ENABLE_DIA_SDK=1^
         -DLLVM_USE_CRT_RELEASE=%CRT_TYPE_RELEASE%^
         -DLLVM_USE_CRT_DEBUG=%CRT_TYPE_DEBUG%^
-        -DCMAKE_C_COMPILER="%LLVM_BIN_PATH%/clang-cl.exe"^
-        -DCMAKE_CXX_COMPILER="%LLVM_BIN_PATH%/clang-cl.exe"^
-        -DCMAKE_LINKER="%LLVM_BIN_PATH%/lld-link.exe"^
+        -DLLVM_TARGETS_TO_BUILD="X86"^
+        -DHAVE_LIBZ=1^
+        -DCMAKE_C_FLAGS="/I%ZLIB_INCLUDE_PATH% /DLLVM_ENABLE_DIA_SDK"^
+        -DCMAKE_CXX_FLAGS="/I%ZLIB_INCLUDE_PATH% /DLLVM_ENABLE_DIA_SDK"^
+        -DCMAKE_EXE_LINKER_FLAGS="%ZLIB_LIBRARY_PATH%/zlibstatic.lib"^
+        -DCMAKE_STATIC_LINKER_FLAGS="%ZLIB_LIBRARY_PATH%/zlibstatic.lib"^
+        -DCMAKE_SHARED_LINKER_FLAGS="%ZLIB_LIBRARY_PATH%/zlibstatic.lib"^
+        -DCMAKE_GENERATOR_PLATFORM=%GENERATOR_PLATFORM%^
         -DCMAKE_BUILD_TYPE=%BUILD_TYPE%^
         %CWD%
 
@@ -292,7 +318,7 @@ if defined BUILD goto checkbuild
 exit /b 0
 
 :dobuild
-cmake --build .
+cmake --build . --config %BUILD_TYPE%
 exit /b 0
 
 :printhelp
