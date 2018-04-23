@@ -16,7 +16,7 @@ Place the build scripts at the root of the LLVM directory tree.
     
 See here on how to obtain the LLVM source code for building:
 
-    https://llvm.org/docs/GettingStarted.html#getting-started-quickly-a-summary
+https://llvm.org/docs/GettingStarted.html#getting-started-quickly-a-summary
     
 Run the build script for the target of your choice:
 
