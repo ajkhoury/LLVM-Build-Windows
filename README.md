@@ -6,13 +6,17 @@ Credits to MSYS project and [Matthew Oliver](https://github.com/Sibras)
 
 ## Usage
 
-Open a command prompt (cmd.exe) and change directory to the root of your LLVM directory tree.
+Open a command prompt (cmd.exe) and change directory to the root of where you want the root of your LLVM directory tree.
 
     >cd C:\llvm-7.0.0
 
 Place the build scripts at the root of the LLVM directory tree.
     
     >git clone https://github.com/dude719/LLVM-Build-Windows .
+    
+See here on how to obtain the LLVM source code for building:
+
+https://llvm.org/docs/GettingStarted.html#getting-started-quickly-a-summary
     
 Run the build script for the target of your choice:
 
