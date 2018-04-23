@@ -6,6 +6,8 @@ Credits to MSYS project and [Matthew Oliver](https://github.com/Sibras)
 
 ## Usage
 
+NOTE: If you want to build clang with clang itself, use the `Ninja` generator instead. 
+
 1. Open a command prompt (cmd.exe) and change directory to the root of where you want the root of your LLVM directory tree.
 
         >cd C:\llvm-7.0.0
