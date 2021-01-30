@@ -334,6 +334,10 @@ echo     -target ARCH                 Set the target architecture
 echo     -directory DIRECTORY         Use specified DIRECTORY for build directory
 echo     -help ^| --help ^| -? ^| /?     Display this help and exit
 echo.
+echo Examples:
+echo     build-llvm.bat -configure -build -static -target x64 -directory build-release-x64
+echo     build-llvm.bat -configure -build -static -target x86 -directory build-release-x32
+echo.
 exit /b 0
 
 pause>nul
