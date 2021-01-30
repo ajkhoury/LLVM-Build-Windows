@@ -330,7 +330,7 @@ echo     -configure                   Configure the project
 echo     -build                       Build the project
 echo     -static                      Configure and build the project statically
 echo     -debug                       Build project with debug configuration
-echo     -target ARCH                 Set the target architecture
+echo     -target ARCH                 Set the target architecture: ( 64 | amd64 | x64 | 32 | Win32 | x86 )
 echo     -directory DIRECTORY         Use specified DIRECTORY for build directory
 echo     -help ^| --help ^| -? ^| /?     Display this help and exit
 echo.
