@@ -14,7 +14,7 @@ NOTE: If you want to build clang with clang itself, use the `Ninja` generator in
 
 2. Place the build scripts at the root of the LLVM directory tree.
     
-        >git clone https://github.com/dude719/LLVM-Build-Windows .
+        >git clone https://github.com/ajkhoury/LLVM-Build-Windows .
     
 3. See here on how to obtain the LLVM source code for building:
 
